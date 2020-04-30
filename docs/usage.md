@@ -9,7 +9,7 @@ Andrea Telatin <andrea.telatin@quadram.ac.uk>
 ### SYNOPSIS
 
 ```
-start-asap.pl -i READS\_DIR -r REFERENCE\_FILE -o OUTPUT\_DIR -g GENUS
+start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
 ```
 
 ### DESCRIPTION
