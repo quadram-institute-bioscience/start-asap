@@ -2,11 +2,16 @@
 
 # start-asap
 
-Initialize an ASA³P configuration file in **Excel** format (as required by ASA³P).
+Initialize an ASA³P configuration file in **Excel** format (as required by ASA³P) from the command line.
 
+### Features
+ * Can prepare the ASA³P project directory in a non-interactive way
+ * Can use project metadata from a JSON file
+ 
+ 
 ### Usage
 
-See the [docs/usage.md] documentation
+See the [documentation](docs/usage.md) page.
 
 ### Output
 
