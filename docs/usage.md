@@ -9,8 +9,7 @@ Andrea Telatin <andrea.telatin@quadram.ac.uk>
 ### SYNOPSIS
 
 ```
-start-asap.pl -i READS\_DIR -r REFERENCE\_FILE -o OUTPUT\_DIR -g GENUS
-
+start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
 ```
 ### DESCRIPTION
 
@@ -58,4 +57,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see &lt;http://www.gnu.org/licenses/>.
+along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
