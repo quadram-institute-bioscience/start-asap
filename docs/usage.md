@@ -6,18 +6,20 @@
 
 Andrea Telatin <andrea.telatin@quadram.ac.uk>
 
-# SYNOPSIS
+### SYNOPSIS
 
+```
 start-asap.pl -i READS\_DIR -r REFERENCE\_FILE -o OUTPUT\_DIR -g GENUS
 
-# DESCRIPTION
+```
+### DESCRIPTION
 
 After running jellyfish with a particular KMERLEN and one or more FASTQ files,
 determine the PEAK using jellyplot.pl and find\_valleys.pl. Next, use this
 PEAK as well as the KMERLEN and the FASTQ files used in the jellyfish run
 as input. The script will determine the coverage and genome size.
 
-# PARAMETERS
+### PARAMETERS
 
 - _-i_, _--input-dir_ DIRECTORY
 
@@ -37,11 +39,11 @@ as input. The script will determine the coverage and genome size.
 
     Place a copy of the reads and reference files in the `./data` subdirectory.
 
-# BUGS
+### BUGS
 
-Please report them to <andrea@telatin.com>
+Please open an issue in the [repository](https://github.com/quadram-institute-bioscience/start-asap)
 
-# COPYRIGHT
+### COPYRIGHT
 
 Copyright (C) 2019-2020 Andrea Telatin 
 
