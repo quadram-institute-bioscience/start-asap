@@ -1,0 +1,8 @@
+{
+        "project_name": "Example project",
+	"project_description": "Resequencing of 1230 E. coli isolates",
+        "user_name":    "Andrea",
+        "user_surname": "Telatin",
+        "user_mail":    "info@example.com",
+        "genus":        "Escherichia" 
+}

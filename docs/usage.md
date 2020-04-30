@@ -9,8 +9,9 @@ Andrea Telatin <andrea.telatin@quadram.ac.uk>
 ### SYNOPSIS
 
 ```
-start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
+start-asap.pl -i READS\_DIR -r REFERENCE\_FILE -o OUTPUT\_DIR -g GENUS
 ```
+
 ### DESCRIPTION
 
 After running jellyfish with a particular KMERLEN and one or more FASTQ files,
@@ -18,7 +19,7 @@ determine the PEAK using jellyplot.pl and find\_valleys.pl. Next, use this
 PEAK as well as the KMERLEN and the FASTQ files used in the jellyfish run
 as input. The script will determine the coverage and genome size.
 
-### PARAMETERS
+### MAIN PARAMETERS
 
 - _-i_, _--input-dir_ DIRECTORY
 
@@ -38,9 +39,53 @@ as input. The script will determine the coverage and genome size.
 
     Place a copy of the reads and reference files in the `./data` subdirectory.
 
+**project metadata**: See the METADATA section
+
+### METADATA
+
+For each project the following metadata is required, that can be provided either from the command line or with a JSON file
+like the following:
+
+    {
+       "user_name" : "Andrea",
+       "user_mail" : "info@example.com",
+       "user_surname" : "Telatin",
+       "project_name": "MaxiSeq",
+       "project_description" : "Resequencing of 1230 E. coli isolates",
+       "genus" : "Escherichia",
+       "project_name" : "Example project"
+    }
+
+- _-p_, _--project-info_ JSON\_FILE
+
+    A JSON file with project metadata. 
+
+Alternatively (will override JSON metadata):
+
+- _--project-name_ STRING
+
+    Project code name
+
+- _--project-description_ STRING
+
+    A description for the project
+
+- _--user-name_ STRING
+
+    First name of the project customer
+
+- _--user-surname_ STRING
+
+    Last name of the project customer
+
+- _--user-mail_ STRING
+
+    Email address name of the project customer
+
 ### BUGS
 
-Please open an issue in the [repository](https://github.com/quadram-institute-bioscience/start-asap)
+Open an issue in the GitHub repository 
+[https://github.com/quadram-institute-bioscience/start-asap](https://github.com/quadram-institute-bioscience/start-asap).
 
 ### COPYRIGHT
 
@@ -57,4 +102,4 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
+along with this program.  If not, see [http://www.gnu.org/licenses](http://www.gnu.org/licenses).

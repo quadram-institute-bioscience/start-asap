@@ -8,7 +8,9 @@ use Spreadsheet::WriteExcel;	#conda install -c bioconda perl-spreadsheet-writeex
 use File::Basename;
 use Getopt::Long;
 use File::Spec;
+use Data::Dumper;
 use Pod::Usage;
+use utf8;
 my $VERSION = '1.0.0';
 my $cmd_string = $RealBin . ' ' . join(' ', @ARGV);
 my $opt_output;
@@ -28,12 +30,21 @@ my %monospace_font = ( font => 'Courier New', size => 11 );
 my $opt_verbose;
 my $opt_help;
 my $opt_version;
+my $opt_project_info;
 
 GetOptions(
 	'i|input-dir=s'  => \$opt_reads_dir,
 	'r|reference=s'  => \@opt_ref,
 	'o|output-dir=s' => \$opt_output,
 	'g|genus=s'      => \$opt_genus,
+	
+	'project-name'        => \$opt_project_name,
+	'project-description' => \$opt_project_description,
+	'user-name'           => \$opt_user_name,
+	'user-surname'        => \$opt_user_surname,
+	'user-mail'           => \$opt_user_mail,
+
+	'p|project-info=s' => \$opt_project_info,
 	'c|copy-files=s' => \$opt_copy,
 	'v|verbose'      => \$opt_verbose,
 	'version'        => \$opt_version,
@@ -42,31 +53,31 @@ GetOptions(
 
 $opt_version && version();
 pod2usage({-exitval => 0, -verbose => 2}) if $opt_help;
-die usage() if (not defined $opt_reads_dir or not defined  $opt_output or not defined $opt_genus  or not defined $opt_ref[0]);
-
-if (not defined $opt_reads_dir) {
-	print STDERR "Please, specify reads directory with -i DIR (or --input-dir)\n";
-	$errors++;
-}
-if (not defined $opt_output) {
-	print STDERR "Please, specify output directory with -o DIR (or --output-dir)\n";
-	$errors++;
-}
-if (not defined $opt_ref[0]) {
-	print STDERR "Please, specify reference -r REFERENCE (or --reference)\n";
-	$errors++;
-}
-
-exit if ($errors);
+die usage() if (not defined $opt_reads_dir or not defined  $opt_output or not defined $opt_ref[0]);
+ 
 
 if (! -d "$opt_output") {
+	verbose("Creating directory: $opt_output");
 	mkdir "$opt_output" || die "FATAL ERROR:\nUnable to create project directory <$opt_output>.\n";
 }
 mkdir File::Spec->catdir("$opt_output", 'data');
 my $config_file = File::Spec->catfile("$opt_output", 'config.xls');
 
+my $project_data;
 
+if (defined $opt_project_info) {
+	$project_data = load_from_json($opt_project_info);
+}
+
+my $project_name = $project_data->{project_name} // $opt_project_name;
+my $project_description = $project_data->{project_description} // $opt_project_description;
+my $user_mail = $project_data->{user_mail} // $opt_user_mail;
+my $user_name = $project_data->{user_name} // $opt_user_name;
+my $user_surname = $project_data->{user_surname} // $opt_user_surname;
+my $genus = $project_data->{genus} // $opt_genus;
 my $workbook = init();
+
+
 
 $workbook->close() or die "Error closing config.xls file: $!";
 
@@ -93,16 +104,16 @@ sub init {
 		$project_worksheet->write('A2', "Name");
 		$project_worksheet->write('A3', "Description");
 		$project_worksheet->write('A4', "Genus");
-		$project_worksheet->write('B2', "$opt_project_name");
-		$project_worksheet->write('B3', "$opt_project_description");
-		$project_worksheet->write('B4', "$opt_genus");
+		$project_worksheet->write('B2', "$project_name");
+		$project_worksheet->write('B3', "$project_description");
+		$project_worksheet->write('B4', "$genus");
 
 		$project_worksheet->write('A8', "Name");
 		$project_worksheet->write('A9', "Surname");
 		$project_worksheet->write('A10', "Email");
-		$project_worksheet->write('B8', "$opt_user_name");
-		$project_worksheet->write('B9', "$opt_user_surname");
-		$project_worksheet->write('B10', "$opt_user_mail");
+		$project_worksheet->write('B8', "$user_name");
+		$project_worksheet->write('B9', "$user_surname");
+		$project_worksheet->write('B10', "$user_mail");
 
 		$project_worksheet->write('A14', "Reference Genome List");
 		$project_worksheet->write('B14', "ref_file1...");
@@ -126,6 +137,17 @@ sub init {
 		return $workbook;
 }
 
+sub load_from_json {
+	my $json;
+	my $file = shift(@_);
+	{
+	  local $/; #Enable 'slurp' mode
+	  open my $fh, "<", "$file" || die "FATAL ERROR:\nError loading project info from $file\n";
+	  $json = <$fh>;
+	  close $fh;
+	}
+	return decode_json($json);
+}
 sub getLoggingTime {
 
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
@@ -136,6 +158,7 @@ sub getLoggingTime {
 
 sub verbose {
 	return 0 if not defined $opt_verbose;
+	say STDERR join("\n", @_);
 }
 sub version {
     # Display version if needed
@@ -167,7 +190,7 @@ determine the PEAK using jellyplot.pl and find_valleys.pl. Next, use this
 PEAK as well as the KMERLEN and the FASTQ files used in the jellyfish run
 as input. The script will determine the coverage and genome size.
  
-=head1 PARAMETERS
+=head1 MAIN PARAMETERS
  
 =over 4
  
@@ -189,12 +212,67 @@ left empty by default.
 
 Place a copy of the reads and reference files in the C<./data> subdirectory.
 
- 
 =back
+
+B<project metadata>: See the METADATA section
+
+
+
+=head1 METADATA
+
+For each project the following metadata is required, that can be provided either from the command line or with a JSON file
+like the following:
+
+   {
+      "user_name" : "Andrea",
+      "user_mail" : "info@example.com",
+      "user_surname" : "Telatin",
+      "project_name": "MaxiSeq",
+      "project_description" : "Resequencing of 1230 E. coli isolates",
+      "genus" : "Escherichia",
+      "project_name" : "Example project"
+   }
+
+
+=over 4
  
+=item I<-p>, I<--project-info> JSON_FILE
+
+A JSON file with project metadata. 
+
+=back
+
+
+Alternatively (will override JSON metadata):
+
+=over 4
+
+=item I<--project-name> STRING
+
+Project code name
+
+=item I<--project-description> STRING
+
+A description for the project
+
+=item I<--user-name> STRING
+
+First name of the project customer
+
+
+=item I<--user-surname> STRING
+
+Last name of the project customer
+
+=item I<--user-mail> STRING
+
+Email address name of the project customer
+
+=back
+
 =head1 BUGS
  
-Please report them to <andrea@telatin.com>
+Open an issue in the GitHub repository L<https://github.com/quadram-institute-bioscience/start-asap>.
  
 =head1 COPYRIGHT
  
