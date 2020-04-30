@@ -2,4 +2,6 @@
 
 # start-asap
 
-Initialize an ASA³P configuration file
+Initialize an ASA³P configuration file in **Excel** format (as required by ASA³P).
+
+![xls](docs/xls.png)
