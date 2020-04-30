@@ -1,8 +1,8 @@
-# NAME
+### NAME
 
 **start-asap.pl** - Create a config.xml file for the ASA3P pipeline
 
-# AUTHOR
+### AUTHOR
 
 Andrea Telatin <andrea.telatin@quadram.ac.uk>
 
