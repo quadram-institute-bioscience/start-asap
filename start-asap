@@ -125,12 +125,14 @@ for my $file (sort @input_reads_files) {
 	
 	if ($basename =~/$opt_for_tag/) {
 		($sample) = split /($opt_id_separator|$opt_for_tag)/, $basename;
+		$sample = clean_sample_name($sample);
 		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:FOR>,".
 		" but that also belongs to <$samples{$sample}{for}>\n" if (defined $samples{$sample}{'for'});
 		$samples{$sample}{'for'} = $basename;
 		verbose("   - FOR:$sample");
 	} elsif ($basename =~/$opt_rev_tag/) {
 		($sample) = split /($opt_id_separator|$opt_rev_tag)/, $basename;
+		$sample = clean_sample_name($sample);
 		verbose("   - REV:$sample");
 		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:REV>,".
 		" but that also belongs to <$samples{$sample}{rev}>\n" if (defined $samples{$sample}{'rev'});
@@ -138,6 +140,7 @@ for my $file (sort @input_reads_files) {
 	} else {
 		verbose("   - SE:$sample");
 		($sample) = split /$opt_single_separator/, $basename;
+		$sample = clean_sample_name($sample);
 		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:SINGLE>,".
 		" but that also belongs to <$samples{$sample}{for}>\n" if (defined $samples{$sample}{'for'});
 		$samples{$sample}{'for'} = $basename;
@@ -173,6 +176,14 @@ for my $sample (sort keys %samples) {
 
 $workbook->close() or die "Error closing config.xls file: $!";
 
+sub clean_sample_name {
+	my $name = shift @_;
+	#Only alpha-numerics, '-' and '.' are allowed. It should contain at least 2 and a maximum of 50 characters.
+	$name =~s/[^A-Za-z0-9-.]/-/g;
+	$name = substr($name, 0, 50);
+	$name = 'X' . $name if (length($name) < 2);
+	return $name;
+}
 sub init {
 
 	my $workbook = Spreadsheet::WriteExcel->new("$config_file");
