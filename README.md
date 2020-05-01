@@ -22,8 +22,8 @@ The program can create an Excel file (`config.xls`) in the project directory, an
 The output file contains, as required two workbooks: 
 
 * Project
-![Project metadata](docs/sample.png)
 
+![Project metadata](docs/sample.png)
 
 * Strains
 
