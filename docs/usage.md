@@ -9,7 +9,7 @@ Andrea Telatin <andrea.telatin@quadram.ac.uk>
 ### SYNOPSIS
 
 ```
-start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
+start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR [-p JSON | -g GENUS -s SPECIES...]
 ```
 
 ### DESCRIPTION
@@ -41,21 +41,8 @@ Requires:
 
     Place a copy of the reads and reference files in the `./data` subdirectory.
 
-- _-ft_, _--for-tag_ STRING
 
-    Identify reads as forward if they contain the string (default: "_R1")
-
-- _-rt_, _--rev-tag_ STRING
-
-    Identify reads as reverse if they contain the string (default: "_R2")
-
-- _-it_, _--id-separator_ STRING 
-
-    Split the file name and the first part will be the sample ID (and strain name). Will abort if more than one sample results in the same ID (default: "_")
-
-
-
-**project metadata**: See the METADATA section
+**Project metadata** can be provided via command line arguments or with a project configuration file (JSON). The two approaches can be combined.
 
 ### METADATA
 
@@ -70,7 +57,9 @@ like the following:
        "project_description" : "Resequencing of 1230 E. coli isolates",
        "genus" : "Escherichia",
 	   "species:" "coli",
-       "project_name" : "Example project"
+       "project_name" : "Example project",
+       "for_tag": "_1",
+       "rev_tag": "_2",
     }
 
 - _-p_, _--project-info_ JSON\_FILE
@@ -86,6 +75,19 @@ Genus of the bacteria (default: "Escherichia")
 - _s_, _--species_ STRING
 
 Species of the bacteria (default: "coli")
+
+
+- _-ft_, _--for-tag_ STRING
+
+    Identify reads as forward if they contain the string (default: "_R1")
+
+- _-rt_, _--rev-tag_ STRING
+
+    Identify reads as reverse if they contain the string (default: "_R2")
+
+- _-it_, _--id-separator_ STRING 
+
+    Split the file name and the first part will be the sample ID (and strain name). Will abort if more than one sample results in the same ID (default: "_")
 
 - _--project-name_ STRING
 

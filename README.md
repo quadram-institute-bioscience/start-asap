@@ -18,3 +18,13 @@ See the [documentation](docs/usage.md) page.
 <img align="right" width="122" height="122" src="docs/xls.png">
 
 The program can create an Excel file (`config.xls`) in the project directory, and optionally can copy the input files int he correct `./data` subdirectory
+
+The output file contains, as required two workbooks: 
+
+* Project
+
+![Project metadata](docs/info.png)
+
+* Strains
+
+![Strains workbook](docs/samples.png)

@@ -105,7 +105,7 @@ for my $ref_file (@opt_ref) {
 	verbose(" - Adding reference: $ref_file in B$ref_cell");
 
 	if ($opt_copy) {
-		verbose("Copying file");
+		verbose("   - Copying reference file");
 		copy("$ref_file", File::Spec->catdir("$opt_output", 'data')) 
 		   or die "ERROR:\nCopy of $ref_file to ".File::Spec->catdir("$opt_output", 'data')."failed:\n$!\n";
 	}
@@ -143,7 +143,7 @@ for my $file (sort @input_reads_files) {
 		$samples{$sample}{'for'} = $basename;
 	}
 	if ($opt_copy) {
-		verbose("Copying file");
+		verbose("   - Copying file");
 		copy(File::Spec->catfile("$opt_reads_dir", "$file"), File::Spec->catdir("$opt_output", 'data')) or die "ERROR:\nCopy of $file to $opt_output failed: $!\n";
 	}
 	
