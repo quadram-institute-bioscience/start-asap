@@ -9,7 +9,8 @@ Initialize an [ASA³P](https://github.com/oschwengers/asap#readme) configuration
 
 ### Features
  * Can prepare the ASA³P project directory in a non-interactive way
- * Can use project metadata from a JSON file
+ * Can use project metadata from a [JSON](demo/info.json) file
+ * Command line parameters (like `--genus Escherichia`) will override JSON configuration(s)
  
  
 ### Usage
