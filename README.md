@@ -11,6 +11,10 @@ Initialize an [ASA³P](https://github.com/oschwengers/asap#readme) configuration
  
 ### Usage
 
+```
+start-asap -i READS_DIR -r REFERENCE -o OUTDIR [-p METADATA_JSON | -g GENUS -s SPECIES]
+```
+
 See the [documentation](docs/usage.md) page.
 
 ### Output
