@@ -3,7 +3,7 @@ use 5.012;
 use warnings;
 use JSON::PP;
 use FindBin qw($RealBin);
-use lib "$RealBin/lib";
+use lib "$RealBin/asap-lib";
 use Spreadsheet::WriteExcel;	#conda install -c bioconda perl-spreadsheet-writeexcel 
 use File::Basename;
 use Getopt::Long;
@@ -260,7 +260,6 @@ sub usage {
     # Short usage string in case of errors
     say STDERR "start-asap.pl -i READS_DIR -r REFERENCE -o OUT_DIR -g Genus\n";
 
-    say "- $opt_genus - $opt_reads_dir - $opt_ref[0] - $opt_output";
     exit;
 }
 __END__
