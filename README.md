@@ -17,9 +17,10 @@ start-asap -i READS_DIR -r REFERENCE -o OUTDIR [-p METADATA_JSON | -g GENUS -s S
 
 See the [documentation](docs/usage.md) page.
 
-### Output
 
 <img align="right" width="122" height="122" src="docs/xls.png">
+
+### Output
 
 The program can create an Excel file (`config.xls`) in the project directory, and optionally can copy the input files int he correct `./data` subdirectory
 
