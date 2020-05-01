@@ -1,4 +1,4 @@
-<img align="right" width="250" height="250" src="docs/asap.png">
+<img align="right" width="250" height="250" src="docs/start-asap.png">
 
 # start-asap
 
