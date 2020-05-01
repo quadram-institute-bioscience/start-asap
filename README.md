@@ -2,7 +2,7 @@
 
 # start-asap
 
-Initialize an ASA³P configuration file in **Excel** format (as required by ASA³P) from the command line.
+Initialize an ASA³P configuration file in **Excel** format (as required by ASA³P) from the command line. [ASA³P](https://github.com/oschwengers/asap) is a fully featured bacterial assembly and analysis pipeline ([paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007134)).
 
 ### Features
  * Can prepare the ASA³P project directory in a non-interactive way
