@@ -14,10 +14,11 @@ start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
 
 ### DESCRIPTION
 
-After running jellyfish with a particular KMERLEN and one or more FASTQ files,
-determine the PEAK using jellyplot.pl and find\_valleys.pl. Next, use this
-PEAK as well as the KMERLEN and the FASTQ files used in the jellyfish run
-as input. The script will determine the coverage and genome size.
+Prepare the input directory for 'ASA3P', creating automatically a _config.xls_ file from the reads provided.
+Requires:
+* One or more reference files (.gbk recommended)
+* A directory with FASTQ files (.fq or .fastq, gzipped)
+
 
 ### MAIN PARAMETERS
 
@@ -35,9 +36,24 @@ as input. The script will determine the coverage and genome size.
     a `config.xml` file will be placed there. The directory will contain a `data` subdirectory,
     left empty by default.
 
+
 - _-c_, _--copy-files_ 
 
     Place a copy of the reads and reference files in the `./data` subdirectory.
+
+- _-ft_, _--for-tag_ STRING
+
+    Identify reads as forward if they contain the string (default: "_R1")
+
+- _-rt_, _--rev-tag_ STRING
+
+    Identify reads as reverse if they contain the string (default: "_R2")
+
+- _-it_, _--id-separator_ STRING 
+
+    Split the file name and the first part will be the sample ID (and strain name). Will abort if more than one sample results in the same ID (default: "_")
+
+
 
 **project metadata**: See the METADATA section
 
@@ -53,6 +69,7 @@ like the following:
        "project_name": "MaxiSeq",
        "project_description" : "Resequencing of 1230 E. coli isolates",
        "genus" : "Escherichia",
+	   "species:" "coli",
        "project_name" : "Example project"
     }
 
@@ -61,6 +78,14 @@ like the following:
     A JSON file with project metadata. 
 
 Alternatively (will override JSON metadata):
+
+- _g_, _--genus_ STRING
+
+Genus of the bacteria (default: "Escherichia")
+
+- _s_, _--species_ STRING
+
+Species of the bacteria (default: "coli")
 
 - _--project-name_ STRING
 

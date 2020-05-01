@@ -4,5 +4,6 @@
         "user_name":    "Andrea",
         "user_surname": "Telatin",
         "user_mail":    "info@example.com",
-        "genus":        "Escherichia" 
+        "genus":        "Escherichia",
+	"species":	"coli", 
 }

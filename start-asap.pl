@@ -9,12 +9,18 @@ use File::Basename;
 use Getopt::Long;
 use File::Spec;
 use Data::Dumper;
+use File::Copy;
 use Pod::Usage;
 use utf8;
 my $VERSION = '1.0.0';
 my $cmd_string = $RealBin . ' ' . join(' ', @ARGV);
 my $opt_output;
 my $opt_reads_dir;
+my $opt_fastq_tag = '(fastq|fq)';
+my $opt_id_separator = '_';
+my $opt_for_tag = "_R1";
+my $opt_rev_tag = "_R2";
+my $opt_single_separator = '\.';
 my @opt_ref;
 my $opt_project_name = 'ASA3P_Project';
 my $opt_project_description = 'Isolate genomes sequencing';
@@ -22,6 +28,7 @@ my $opt_genus = 'Escherichia';
 my $opt_user_name = 'Quadram';
 my $opt_user_surname = 'Institute';
 my $opt_user_mail = 'asap@exampe.com';
+my $opt_species = 'coli';
 my $warnings = 0;
 my $errors   = 0;
 my $opt_copy;
@@ -33,10 +40,14 @@ my $opt_version;
 my $opt_project_info;
 
 GetOptions(
-	'i|input-dir=s'  => \$opt_reads_dir,
-	'r|reference=s'  => \@opt_ref,
-	'o|output-dir=s' => \$opt_output,
-	'g|genus=s'      => \$opt_genus,
+	'i|input-dir=s'     => \$opt_reads_dir,
+	'r|reference=s'     => \@opt_ref,
+	'o|output-dir=s'    => \$opt_output,
+	'g|genus=s'         => \$opt_genus,
+	's|species=s'       => \$opt_species,
+	'ft|for-tag=s'      => \$opt_for_tag,
+	'rt|rev-tag=s'      => \$opt_rev_tag,
+	'it|id-separator=s' => \$opt_id_separator,	
 	
 	'project-name'        => \$opt_project_name,
 	'project-description' => \$opt_project_description,
@@ -44,11 +55,13 @@ GetOptions(
 	'user-surname'        => \$opt_user_surname,
 	'user-mail'           => \$opt_user_mail,
 
+
+
 	'p|project-info=s' => \$opt_project_info,
-	'c|copy-files=s' => \$opt_copy,
-	'v|verbose'      => \$opt_verbose,
-	'version'        => \$opt_version,
-	'h|help'         => \$opt_help,
+	'c|copy-files'     => \$opt_copy,
+	'v|verbose'        => \$opt_verbose,
+	'version'          => \$opt_version,
+	'h|help'           => \$opt_help,
 );
 
 $opt_version && version();
@@ -64,23 +77,101 @@ mkdir File::Spec->catdir("$opt_output", 'data');
 my $config_file = File::Spec->catfile("$opt_output", 'config.xls');
 
 my $project_data;
-
 if (defined $opt_project_info) {
 	$project_data = load_from_json($opt_project_info);
 }
 
-my $project_name = $project_data->{project_name} // $opt_project_name;
-my $project_description = $project_data->{project_description} // $opt_project_description;
-my $user_mail = $project_data->{user_mail} // $opt_user_mail;
-my $user_name = $project_data->{user_name} // $opt_user_name;
-my $user_surname = $project_data->{user_surname} // $opt_user_surname;
-my $genus = $project_data->{genus} // $opt_genus;
-my $workbook = init();
+my $project_name = $project_data->{'project_name'} // $opt_project_name;
+my $project_description = $project_data->{'project_description'} // $opt_project_description;
+my $user_mail = $project_data->{'user_mail'} // $opt_user_mail;
+my $user_name = $project_data->{'user_name'} // $opt_user_name;
+my $user_surname = $project_data->{'user_surname'} // $opt_user_surname;
+my $genus = $project_data->{'genus'} // $opt_genus;
+$opt_for_tag = $project_data->{'for_tag'} // $opt_for_tag;
+$opt_rev_tag = $project_data->{'rev_tag'} // $opt_rev_tag;
+$opt_single_separator = $project_data->{'opt_single_separator'} // $opt_single_separator;
 
+unless ($genus) {
+	die "MISSING PARAMETER 'genus': Specify via --genus GENUS or in the JSON config file.\n";
+}
+my ($workbook, $project_worksheet, $strains_worksheet)  = init();
+
+verbose("REFERENCE FILES");
+my $ref_cell = 14;
+for my $ref_file (@opt_ref) {
+	my $cell = 'B'.$ref_cell;
+	$project_worksheet->write("$cell", basename($ref_file));
+	$ref_cell++;
+	verbose(" - Adding reference: $ref_file in B$ref_cell");
+
+	if ($opt_copy) {
+		verbose("Copying file");
+		copy("$ref_file", File::Spec->catdir("$opt_output", 'data')) 
+		   or die "ERROR:\nCopy of $ref_file to ".File::Spec->catdir("$opt_output", 'data')."failed:\n$!\n";
+	}
+}
+
+verbose("INPUT FASTQ FILES");
+opendir my $dir, "$opt_reads_dir" or die "ERROR: Cannot open reads directory: $!";
+my @input_reads_files = readdir $dir;
+my %samples;
+for my $file (sort @input_reads_files) {
+	my $sample;
+	next if ($file =~/^\./);
+	next unless ($file=~/$opt_fastq_tag/);
+
+	my $basename = basename($file);
+	verbose(" - FASTQ file found: $basename");
+	
+	if ($basename =~/$opt_for_tag/) {
+		($sample) = split /($opt_id_separator|$opt_for_tag)/, $basename;
+		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:FOR>,".
+		" but that also belongs to <$samples{$sample}{for}>\n" if (defined $samples{$sample}{'for'});
+		$samples{$sample}{'for'} = $basename;
+		verbose("   - FOR:$sample");
+	} elsif ($basename =~/$opt_rev_tag/) {
+		($sample) = split /($opt_id_separator|$opt_rev_tag)/, $basename;
+		verbose("   - REV:$sample");
+		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:REV>,".
+		" but that also belongs to <$samples{$sample}{rev}>\n" if (defined $samples{$sample}{'rev'});
+		$samples{$sample}{'rev'} = $basename;
+	} else {
+		verbose("   - SE:$sample");
+		($sample) = split /$opt_single_separator/, $basename;
+		die "FATAL ERROR: Parsing file <$basename> the inferred sample ID was <$sample:SINGLE>,".
+		" but that also belongs to <$samples{$sample}{for}>\n" if (defined $samples{$sample}{'for'});
+		$samples{$sample}{'for'} = $basename;
+	}
+	if ($opt_copy) {
+		verbose("Copying file");
+		copy(File::Spec->catfile("$opt_reads_dir", "$file"), File::Spec->catdir("$opt_output", 'data')) or die "ERROR:\nCopy of $file to $opt_output failed: $!\n";
+	}
+	
+}
+
+my $sample_cell = 2;
+for my $sample (sort keys %samples) {
+	my $type = 'single';
+	$strains_worksheet->write("A$sample_cell", "$opt_species");	# species name like 'coli'
+	$strains_worksheet->write("B$sample_cell", "$sample");	# has to be unique (ID)
+	
+	if (defined $samples{$sample}{'rev'}) {
+		$type = 'paired-end';
+		$strains_worksheet->write("C$sample_cell", $type);	# single paired-end contigs genome
+		$strains_worksheet->write("D$sample_cell", $samples{$sample}{'for'});
+		$strains_worksheet->write("E$sample_cell", $samples{$sample}{'rev'});
+		verbose(" - Writing $sample:\t$type\t$samples{$sample}{'for'},$samples{$sample}{'rev'} in range A$sample_cell:B$sample_cell");
+	} else {
+		$strains_worksheet->write("C$sample_cell", $type);	# single paired-end contigs genome
+		$strains_worksheet->write("D$sample_cell", $samples{$sample}{'for'});
+		verbose(" - Writing $sample:\t$type\t$samples{$sample}{'for'} in range A$sample_cell:B$sample_cell");
+	}
+	$sample_cell++;
+	
+}
 
 
 $workbook->close() or die "Error closing config.xls file: $!";
-
 
 sub init {
 
@@ -116,12 +207,12 @@ sub init {
 		$project_worksheet->write('B10', "$user_mail");
 
 		$project_worksheet->write('A14', "Reference Genome List");
-		$project_worksheet->write('B14', "ref_file1...");
-		#$project_worksheet->write('B15', "Reference Genome List");
+
 
 		$project_worksheet->set_column('A:A', '25');
 		$project_worksheet->set_column('B:B', '40');
 		$project_worksheet->set_column('E:E', '80');
+	
 	my $strains_worksheet = $workbook->add_worksheet('Strains');
 	#Species	Strain	Input	File 1	[ File 2 ]	[ File 3 ]
 		$strains_worksheet->write('A1', 'Species', $title_format);	# species name like 'coli'
@@ -134,7 +225,7 @@ sub init {
 		$strains_worksheet->set_column('A:C', '15');
 		$strains_worksheet->set_column('D:F', '35');
 
-		return $workbook;
+		return ($workbook, $project_worksheet, $strains_worksheet);
 }
 
 sub load_from_json {
@@ -167,7 +258,10 @@ sub version {
  
 sub usage {
     # Short usage string in case of errors
-    die "start-asap.pl -i READS_DIR -r REFERENCE -o OUT_DIR -g Genus\n";
+    say STDERR "start-asap.pl -i READS_DIR -r REFERENCE -o OUT_DIR -g Genus\n";
+
+    say "- $opt_genus - $opt_reads_dir - $opt_ref[0] - $opt_output";
+    exit;
 }
 __END__
  
@@ -181,14 +275,13 @@ Andrea Telatin <andrea.telatin@quadram.ac.uk>
  
 =head1 SYNOPSIS
  
-start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR -g GENUS
+   start-asap.pl -i READS_DIR -r REFERENCE_FILE -o OUTPUT_DIR [-p JSON_FILE | -g GENUS -s SPECIES ...]
  
 =head1 DESCRIPTION
  
-After running jellyfish with a particular KMERLEN and one or more FASTQ files,
-determine the PEAK using jellyplot.pl and find_valleys.pl. Next, use this
-PEAK as well as the KMERLEN and the FASTQ files used in the jellyfish run
-as input. The script will determine the coverage and genome size.
+Prepare the input directory for 'ASA3P', creating automatically a _config.xls_ file from the reads provided.
+Requires one or more reference files (.gbk recommended) and a directory with FASTQ files (.fq or .fastq, gzipped).
+Metadata can be supplied via command line or with a JSON file.
  
 =head1 MAIN PARAMETERS
  
@@ -212,16 +305,27 @@ left empty by default.
 
 Place a copy of the reads and reference files in the C<./data> subdirectory.
 
+=item I<-ft>, I<--for-tag> STRING
+
+String denoting the file is a Forward file (default: "_R1"). 
+
+=item I<-rt>, I<--rev-tag> STRING
+
+String denoting the file is a Reverse file (default: "_R2")
+
+=item I<-it>, I<--id-separator> STRING
+
+The sample ID will determined splitting the name at the separator (default: "_"). 
+
 =back
 
 B<project metadata>: See the METADATA section
 
 
-
 =head1 METADATA
 
 For each project the following metadata is required, that can be provided either from the command line or with a JSON file
-like the following:
+like the following. Not al the lines need to be added, if the defaults are fine (eg: for-tag, rev-tag):
 
    {
       "user_name" : "Andrea",
@@ -230,7 +334,12 @@ like the following:
       "project_name": "MaxiSeq",
       "project_description" : "Resequencing of 1230 E. coli isolates",
       "genus" : "Escherichia",
-      "project_name" : "Example project"
+      "species": "coli",
+      "project_name" : "Example project",
+      "for_tag": "_1",
+      "rev_tag": "_2",
+
+
    }
 
 
@@ -246,6 +355,14 @@ A JSON file with project metadata.
 Alternatively (will override JSON metadata):
 
 =over 4
+
+=item I<--genus> STRING
+
+Genus of the bacteria
+
+=item I<--species> STRING
+
+Species of the bacteria
 
 =item I<--project-name> STRING
 
@@ -272,23 +389,12 @@ Email address name of the project customer
 
 =head1 BUGS
  
-Open an issue in the GitHub repository L<https://github.com/quadram-institute-bioscience/start-asap>.
+Open an issue in the GitHub repository L<https://github.com/quadram-institute-bioscience/start-asap/issues>.
  
 =head1 COPYRIGHT
  
 Copyright (C) 2019-2020 Andrea Telatin 
  
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
- 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
- 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This program is free software distributed under the MIT licence.	
  
 =cut
