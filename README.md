@@ -27,4 +27,4 @@ The output file contains, as required two workbooks:
 
 * Strains
 
-![Strains workbook](docs/samples.png)
+![Strains workbook](docs/sample.png)
