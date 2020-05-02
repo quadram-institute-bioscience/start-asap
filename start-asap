@@ -12,8 +12,9 @@ use Data::Dumper;
 use File::Copy;
 use Pod::Usage;
 use utf8;
-my $VERSION = '1.0.0';
-my $cmd_string = $RealBin . ' ' . join(' ', @ARGV);
+my $VERSION = '1.1.0';
+my $cmd_string = File::Spec->catfile($RealBin, basename($0) ) . ' "' . join('" "', @ARGV) .'"';
+
 my $opt_output;
 my $opt_reads_dir;
 my $opt_fastq_tag = '(fastq|fq)';
@@ -95,7 +96,7 @@ unless ($genus) {
 	die "MISSING PARAMETER 'genus': Specify via --genus GENUS or in the JSON config file.\n";
 }
 my ($workbook, $project_worksheet, $strains_worksheet)  = init();
-
+verbose("Running: $cmd_string");
 verbose("REFERENCE FILES");
 my $ref_cell = 14;
 for my $ref_file (@opt_ref) {

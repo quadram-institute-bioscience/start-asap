@@ -1,45 +1,39 @@
 {% set name = "start-asap" %}
 {% set version = "1.0.0" %}
-{% set sha256 = "xxx" %}
+{% set sha256 = "a6e449ffa07065a94759beff10d876105152ca90227ad9591a5734a86bf5cfd7" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://github.com/quadram-institute-bioscience/{{ name }}/archive/v.{{ version }}.tar.gz
+  url: https://github.com/quadram-institute-bioscience/{{ name }}/archive/v{{ version }}.tar.gz
   sha256: {{ sha256 }}
 
 build:
   noarch: generic
-  number: 1
+  number: 0
 
 requirements:
-  host:
-    - perl
-    - perl-app-cpanminus
-
-
   run:
     - perl
-    - perl-file-which
+    - perl-pod-usage
     - perl-getopt-long
     - perl-json-pp
     - perl-spreadsheet-writeexcel 
-    - perl-exporter
-    - perl-text-asciitable
-    - perl-pod-usage
+
+
 
 
 test:
   commands:
   # (see run_test.sh for remainder of tests)
-    - start-asap --version
+    - start-asap --version 2>&1 | grep {{ version }}
 
 
 about:
   home: http://github.com/quadram-institute-bioscience/start-asap/
-  license: mit
+  license: MIT
   summary: 'Prepare project directory and project sheet for ASA3P'
   description: |
     Prepare the input directory for 'ASA3P', creating automatically a _config.xls_ file from the reads provided.
