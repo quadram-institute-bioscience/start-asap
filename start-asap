@@ -124,6 +124,8 @@ for my $ref_file (@opt_ref) {
 		verbose("   - Copying reference file");
 		copy("$ref_file", File::Spec->catdir("$opt_output", 'data')) 
 		   or die "ERROR:\nCopy of $ref_file to ".File::Spec->catdir("$opt_output", 'data')."failed:\n$!\n";
+	} else {
+		print STDERR "WARNING: Files not copied (use -c) to $opt_output\n";
 	}
 }
 
