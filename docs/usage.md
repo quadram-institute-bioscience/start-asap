@@ -41,6 +41,9 @@ Requires:
 
     Place a copy of the reads and reference files in the `./data` subdirectory.
 
+- _--force_ 
+
+    Delete the content of the output directory if it exists and contains a configuration file.
 
 **Project metadata** can be provided via command line arguments or with a project configuration file (JSON). The two approaches can be combined.
 
