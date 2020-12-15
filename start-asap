@@ -12,7 +12,7 @@ use Data::Dumper;
 use File::Copy;
 use Pod::Usage;
 use utf8;
-my $VERSION = '1.1.0';
+my $VERSION = '1.2.0';
 my $cmd_string = File::Spec->catfile($RealBin, basename($0) ) . ' "' . join('" "', @ARGV) .'"';
 
 my $opt_output;
@@ -39,6 +39,7 @@ my $opt_verbose;
 my $opt_help;
 my $opt_version;
 my $opt_project_info;
+my $opt_force;
 
 GetOptions(
 	'i|input-dir=s'     => \$opt_reads_dir,
@@ -50,17 +51,18 @@ GetOptions(
 	'rt|rev-tag=s'      => \$opt_rev_tag,
 	'it|id-separator=s' => \$opt_id_separator,	
 	
-	'project-name'        => \$opt_project_name,
-	'project-description' => \$opt_project_description,
-	'user-name'           => \$opt_user_name,
-	'user-surname'        => \$opt_user_surname,
-	'user-mail'           => \$opt_user_mail,
+	'project-name'          => \$opt_project_name,
+	'project-description=s' => \$opt_project_description,
+	'user-name=s'           => \$opt_user_name,
+	'user-surname=s'        => \$opt_user_surname,
+	'user-mail=s'           => \$opt_user_mail,
 
 
 
 	'p|project-info=s' => \$opt_project_info,
 	'c|copy-files'     => \$opt_copy,
 	'v|verbose'        => \$opt_verbose,
+	'force'            => \$opt_force,
 	'version'          => \$opt_version,
 	'h|help'           => \$opt_help,
 );
@@ -73,6 +75,19 @@ die usage() if (not defined $opt_reads_dir or not defined  $opt_output or not de
 if (! -d "$opt_output") {
 	verbose("Creating directory: $opt_output");
 	mkdir "$opt_output" || die "FATAL ERROR:\nUnable to create project directory <$opt_output>.\n";
+} else {
+	# 1.2 - directory found
+	if ($opt_force) {
+		`rm -rf \"$opt_output\"/*`;
+		if ( $? ) {
+			print STDERR "ERROR: Unable to remove output directory: $opt_output\n";
+		} else {
+			print STDERR "INFO: Output directory cleaned.\n";
+		}
+	} else {
+		print STDERR "ERROR: Output directory ($opt_output) found, quitting (use --force to override).\n";
+	}
+
 }
 mkdir File::Spec->catdir("$opt_output", 'data');
 my $config_file = File::Spec->catfile("$opt_output", 'config.xls');
