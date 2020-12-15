@@ -333,6 +333,10 @@ left empty by default.
 
 Place a copy of the reads and reference files in the C<./data> subdirectory.
 
+=item I<--force> 
+
+Remove the content of the output directory, if a config file is found.
+
 =item I<-ft>, I<--for-tag> STRING
 
 String denoting the file is a Forward file (default: "_R1"). 
