@@ -12,7 +12,7 @@ use Data::Dumper;
 use File::Copy;
 use Pod::Usage;
 use utf8;
-my $VERSION = '1.2.0';
+my $VERSION = '1.2.1';
 my $cmd_string = File::Spec->catfile($RealBin, basename($0) ) . ' "' . join('" "', @ARGV) .'"';
 
 my $opt_output;
@@ -25,15 +25,15 @@ my $opt_single_separator = '\.';
 my @opt_ref;
 my $opt_project_name = 'ASA3P_Project';
 my $opt_project_description = 'Isolate genomes sequencing';
-my $opt_genus = 'Escherichia';
-my $opt_user_name = 'Quadram';
-my $opt_user_surname = 'Institute';
+my $opt_user_name = 'User';
+my $opt_user_surname = '';
 my $opt_user_mail = 'asap@exampe.com';
-my $opt_species = 'coli';
+my $opt_genus = 'Bacterium';
+my $opt_species = 'sp.';
 my $warnings = 0;
 my $errors   = 0;
 my $opt_copy;
-my %title_font  = (font  => 'Arial', size  => 12,  bold  => 1, bg_color => 'silver');
+my %title_font     = ( font => 'Arial',       size => 12,  bold  => 1, bg_color => 'silver');
 my %monospace_font = ( font => 'Courier New', size => 11 );
 my $opt_verbose;
 my $opt_help;
@@ -42,14 +42,14 @@ my $opt_project_info;
 my $opt_force;
 
 GetOptions(
-	'i|input-dir=s'     => \$opt_reads_dir,
-	'r|reference=s'     => \@opt_ref,
-	'o|output-dir=s'    => \$opt_output,
-	'g|genus=s'         => \$opt_genus,
-	's|species=s'       => \$opt_species,
-	'ft|for-tag=s'      => \$opt_for_tag,
-	'rt|rev-tag=s'      => \$opt_rev_tag,
-	'it|id-separator=s' => \$opt_id_separator,	
+	'i|input-dir=s'         => \$opt_reads_dir,
+	'r|reference=s'         => \@opt_ref,
+	'o|output-dir=s'        => \$opt_output,
+	'g|genus=s'             => \$opt_genus,
+	's|species=s'           => \$opt_species,
+	'ft|for-tag=s'          => \$opt_for_tag,
+	'rt|rev-tag=s'          => \$opt_rev_tag,
+	'it|id-separator=s'     => \$opt_id_separator,	
 	
 	'project-name'          => \$opt_project_name,
 	'project-description=s' => \$opt_project_description,
@@ -57,19 +57,21 @@ GetOptions(
 	'user-surname=s'        => \$opt_user_surname,
 	'user-mail=s'           => \$opt_user_mail,
 
-
-
-	'p|project-info=s' => \$opt_project_info,
-	'c|copy-files'     => \$opt_copy,
-	'v|verbose'        => \$opt_verbose,
-	'force'            => \$opt_force,
-	'version'          => \$opt_version,
-	'h|help'           => \$opt_help,
+	'p|project-info=s'      => \$opt_project_info,
+	'c|copy-files'          => \$opt_copy,
+	'v|verbose'             => \$opt_verbose,
+	'force'                 => \$opt_force,
+	'version'               => \$opt_version,
+	'h|help'                => \$opt_help,
 );
 
 $opt_version && version();
-pod2usage({-exitval => 0, -verbose => 2}) if $opt_help;
-die usage() if (not defined $opt_reads_dir or not defined  $opt_output or not defined $opt_ref[0]);
+
+pod2usage({-exitval => 0, -verbose => 2}) 
+	if $opt_help;
+
+die usage() 
+    if (not defined $opt_reads_dir or not defined  $opt_output or not defined $opt_ref[0]);
  
 
 if (! -d "$opt_output") {
