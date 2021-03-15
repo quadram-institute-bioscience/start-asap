@@ -12,7 +12,7 @@ use Data::Dumper;
 use File::Copy;
 use Pod::Usage;
 use utf8;
-my $VERSION = '1.2.1';
+my $VERSION = '1.3.0';
 my $cmd_string = File::Spec->catfile($RealBin, basename($0) ) . ' "' . join('" "', @ARGV) .'"';
 
 my $opt_output;
@@ -27,7 +27,7 @@ my $opt_project_name = 'ASA3P_Project';
 my $opt_project_description = 'Isolate genomes sequencing';
 my $opt_user_name = 'User';
 my $opt_user_surname = '';
-my $opt_user_mail = 'asap@exampe.com';
+my $opt_user_mail = 'asap@example.com';
 my $opt_genus = 'Bacterium';
 my $opt_species = 'sp.';
 my $warnings = 0;
@@ -91,6 +91,7 @@ if (! -d "$opt_output") {
 	}
 
 }
+
 mkdir File::Spec->catdir("$opt_output", 'data');
 my $config_file = File::Spec->catfile("$opt_output", 'config.xls');
 
@@ -101,10 +102,10 @@ if (defined $opt_project_info) {
 
 my $project_name = $project_data->{'project_name'} // $opt_project_name;
 my $project_description = $project_data->{'project_description'} // $opt_project_description;
-my $user_mail = $project_data->{'user_mail'} // $opt_user_mail;
-my $user_name = $project_data->{'user_name'} // $opt_user_name;
+my $user_mail    = $project_data->{'user_mail'} // $opt_user_mail;
+my $user_name    = $project_data->{'user_name'} // $opt_user_name;
 my $user_surname = $project_data->{'user_surname'} // $opt_user_surname;
-my $genus = $project_data->{'genus'} // $opt_genus;
+my $genus        = $project_data->{'genus'} // $opt_genus;
 $opt_for_tag = $project_data->{'for_tag'} // $opt_for_tag;
 $opt_rev_tag = $project_data->{'rev_tag'} // $opt_rev_tag;
 $opt_single_separator = $project_data->{'opt_single_separator'} // $opt_single_separator;
